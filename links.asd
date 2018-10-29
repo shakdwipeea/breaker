@@ -6,6 +6,6 @@
   :license  "Specify license here"
   :version "0.0.1"
   :serial t
-  :depends-on (#:drakma #:yason #:flexi-streams #:alexandria #:jonathan #:dexador #:mito)
+  :depends-on (#:flexi-streams #:alexandria #:jonathan #:dexador #:mito #:closer-mop)
   :components ((:file "package")
                (:file "links")))
