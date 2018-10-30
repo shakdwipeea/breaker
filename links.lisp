@@ -51,9 +51,6 @@
 					 :initial-value (list)))))
 
 
-(defvar slots (get-slots 'post))
-
-
 (defmacro enable-print (c)
   "add a generic print method to class c which prints all the slots of the class"
   (let* ((slots (get-slots c))
@@ -77,7 +74,7 @@
 ;;;;;;;;;;;;;;;;;
 
 (defun connect ()
-  (mito:connect-toplevel :sqlite3 :database-name "reddit"))
+  (mito:connect-toplevel :sqlite3 :database-name "links"))
 
 
 (defclass post ()
@@ -96,14 +93,15 @@
 	   :initarg :author)
    (|title| :col-type (:varchar 256)
 	    :initarg :title
-	    :accessor :title)
-   (|created_utc| :col-type (:varchar 128)
-		  :initarg :created_utc
+	    :accessor title)
+   (|created-utc| :col-type (:varchar 256)
+		  :initarg :created-utc
 		  :accessor created-utc))
-  (:metaclass mito:dao-table-class))
+  (:metaclass mito:dao-table-class)
+  (:unique-keys |title|))
 
 
-(enable-print post)
+;; (enable-print post)
 
 
 (defun store-posts (posts)
@@ -134,15 +132,20 @@
 
 ;; (get-in child-data :|title|)
 
-(defvar cren '())
+(defun rename-key (plist old-key new-key)
+  (setf (getf plist new-key) (getf plist old-key))
+  plist)
+
 
 (defun parse-post-data (subreddit-json)
   (let ((children  (get-in subreddit-json "data" "children")))
-    (defvar cren children)
-    (format t "chidlren lengh ~d " (length children))
     (mapcar (lambda (child)
-	      (instance-from-plist 'post (get-in child "data")))
+	      (defvar child-data child)
+	      (instance-from-plist 'post (rename-key (get-in child "data")
+						     :|created_utc|
+						     :|created-utc|)))
 	    children)))
+
 
 ;; (mapcar length child-data)
 
@@ -153,13 +156,16 @@
 				:headers (list user-agent))))
 
 
-(setq posts (fetch-subreddit-json "haskell"))
+;; (setq posts (fetch-subreddit-json "haskell"))
 
-(created-utc (second posts))
+;; (created-utc (second posts))
 
-(store-posts posts)
+;; (store-posts posts)
 
+;; (mapcar (lambda (post) (created-utc post))
+;; 	(mito:retrieve-dao 'post))
 
+;; (mito:delete-by-values 'post)
 
 ;; connect and perform migrations
 (progn (connect)
