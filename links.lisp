@@ -132,6 +132,7 @@
 
 ;; (get-in child-data :|title|)
 
+;; todo generalize to include a vector of pair of old-key and new-key
 (defun rename-key (plist old-key new-key)
   (setf (getf plist new-key) (getf plist old-key))
   plist)
